@@ -42,11 +42,35 @@ app.add_middleware(
 # ==========================================
 
 # PCOS
-rf_model = pickle.load(open("models/pcos/rf_model.pkl", "rb"))
-xgb_model = pickle.load(open("models/pcos/xgb_model.pkl", "rb"))
-knn_model = pickle.load(open("models/pcos/knn_model.pkl", "rb"))
-scaler = pickle.load(open("models/pcos/scaler.pkl", "rb"))
-imputer = pickle.load(open("models/pcos/imputer.pkl", "rb"))
+try:
+    rf_model = pickle.load(open("models/pcos/rf_model.pkl", "rb"))
+except Exception as e:
+    print(f"Warning: Could not load PCOS RF: {e}")
+    rf_model = None
+
+try:
+    xgb_model = pickle.load(open("models/pcos/xgb_model.pkl", "rb"))
+except Exception as e:
+    print(f"Warning: Could not load PCOS XGB: {e}")
+    xgb_model = None
+
+try:
+    knn_model = pickle.load(open("models/pcos/knn_model.pkl", "rb"))
+except Exception as e:
+    print(f"Warning: Could not load PCOS KNN: {e}")
+    knn_model = None
+
+try:
+    scaler = pickle.load(open("models/pcos/scaler.pkl", "rb"))
+except Exception as e:
+    print(f"Warning: Could not load PCOS scaler: {e}")
+    scaler = None
+
+try:
+    imputer = pickle.load(open("models/pcos/imputer.pkl", "rb"))
+except Exception as e:
+    print(f"Warning: Could not load PCOS imputer: {e}")
+    imputer = None
 
 # MENOPAUSE
 try:
@@ -107,6 +131,12 @@ def ml_predict(data: dict = Body(...)):
 
     # ================= PCOS =================
     if model_type == "pcos":
+
+        if rf_model is None or xgb_model is None or knn_model is None or scaler is None or imputer is None:
+            return {
+                "fallback": True,
+                "error": "PCOS model not available"
+            }
 
         cycle_val = 1 if input_data["cycleRegular"] else 0
 
